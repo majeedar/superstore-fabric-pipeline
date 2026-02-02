@@ -8,38 +8,35 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "a109ee49-a219-4882-afc7-f836c70d955c",
-# META       "default_lakehouse_name": "superstore_bronze",
+# META       "default_lakehouse": "db097b4f-cccf-4967-9222-1daf1746a05f",
+# META       "default_lakehouse_name": "superstore_project",
 # META       "default_lakehouse_workspace_id": "79978027-ed02-401b-8c3f-d91bb5c9a294",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "a109ee49-a219-4882-afc7-f836c70d955c"
+# META           "id": "db097b4f-cccf-4967-9222-1daf1746a05f"
 # META         }
 # META       ]
-# META     },
-# META     "environment": {
-# META       "environmentId": "27c88d7d-4268-a72a-499b-c0a91f1ab2e6",
-# META       "workspaceId": "00000000-0000-0000-0000-000000000000"
 # META     }
 # META   }
 # META }
 
 # CELL ********************
 
-# Import libraries
+# Import Libraries
 from pyspark.sql import functions as F
 from pyspark.sql.types import *
 from pyspark.sql.window import Window
 from datetime import datetime
 from delta.tables import DeltaTable
 
-# Configuration
-BRONZE_PATH = "Files/superstore_bronze/raw_data"
-SILVER_PATH = "Files/superstore_silver/cleaned_data"
-WATERMARK_PATH = "Files/superstore_silver/watermark/"
+BRONZE_PATH = "Files/bronze_layer/raw_data"
+SILVER_PATH = "Files/silver_layer/cleaned_data"
+WATERMARK_PATH = "Files/silver_layer/watermarks/silver_watermark/"
 
-print("Silver Layer Transformation Pipeline")
 print("=" * 70)
+print("SILVER LAYER - TRANSFORMATION & VALIDATION")
+print("=" * 70)
+
 
 # METADATA ********************
 
@@ -50,21 +47,20 @@ print("=" * 70)
 
 # CELL ********************
 
-# Check for existing watermark to determine load type
+# Watermark Check
 def get_last_watermark(watermark_path):
     try:
         watermark_df = spark.read.format("delta").load(watermark_path)
-        last_timestamp = watermark_df.agg(F.max("last_processed_timestamp")).collect()[0][0]
-        return last_timestamp
+        return watermark_df.agg(F.max("last_processed_timestamp")).collect()[0][0]
     except:
         return None
 
 last_watermark = get_last_watermark(WATERMARK_PATH)
 
 if last_watermark:
-    print(f"Incremental Load Mode - Last watermark: {last_watermark}")
+    print(f"Incremental Mode - Last watermark: {last_watermark}")
 else:
-    print("Full Load Mode - No existing watermark found")
+    print("Full Load Mode - No watermark found")
 
 # METADATA ********************
 
@@ -75,23 +71,17 @@ else:
 
 # CELL ********************
 
-# Read bronze layer
+# Read Bronze & Filter
 bronze_df = spark.read.format("delta").load(BRONZE_PATH)
 
-# Filter based on watermark (incremental) or load all (full)
 if last_watermark:
     new_records_df = bronze_df.filter(F.col("ingestion_timestamp") > last_watermark)
+    print(f"Incremental: {new_records_df.count():,} new records")
 else:
     new_records_df = bronze_df
+    print(f"Full load: {new_records_df.count():,} records")
 
-record_count = new_records_df.count()
-print(f"Records to process: {record_count:,}")
-
-# Set flag for downstream processing
-HAS_NEW_RECORDS = record_count > 0
-
-if not HAS_NEW_RECORDS:
-    print("No new records to process - pipeline will skip transformations")
+HAS_NEW_RECORDS = new_records_df.count() > 0
 
 # METADATA ********************
 
@@ -102,19 +92,15 @@ if not HAS_NEW_RECORDS:
 
 # CELL ********************
 
-# Only transform if there are new records
+# Transformations
 if HAS_NEW_RECORDS:
-    # Data type conversions
     silver_df = new_records_df \
         .withColumn("Order_Date", F.to_date(F.col("Order_Date"), "M/d/yyyy")) \
         .withColumn("Ship_Date", F.to_date(F.col("Ship_Date"), "M/d/yyyy")) \
         .withColumn("Sales", F.col("Sales").cast(DecimalType(10, 2))) \
         .withColumn("Quantity", F.col("Quantity").cast(IntegerType())) \
         .withColumn("Discount", F.col("Discount").cast(DecimalType(5, 4))) \
-        .withColumn("Profit", F.col("Profit").cast(DecimalType(10, 2)))
-
-    # Text cleaning
-    silver_df = silver_df \
+        .withColumn("Profit", F.col("Profit").cast(DecimalType(10, 2))) \
         .withColumn("Customer_Name", F.trim(F.initcap(F.col("Customer_Name")))) \
         .withColumn("Product_Name", F.trim(F.col("Product_Name"))) \
         .withColumn("City", F.trim(F.upper(F.col("City")))) \
@@ -125,10 +111,7 @@ if HAS_NEW_RECORDS:
         .withColumn("Segment", F.trim(F.col("Segment"))) \
         .withColumn("Category", F.trim(F.col("Category"))) \
         .withColumn("Sub_Category", F.trim(F.col("Sub_Category"))) \
-        .withColumn("Postal_Code", F.lpad(F.trim(F.col("Postal_Code")), 5, "0"))
-
-    # Derived columns
-    silver_df = silver_df \
+        .withColumn("Postal_Code", F.lpad(F.trim(F.col("Postal_Code").cast("string")), 5, "0")) \
         .withColumn("order_year", F.year(F.col("Order_Date"))) \
         .withColumn("order_month", F.month(F.col("Order_Date"))) \
         .withColumn("order_quarter", F.quarter(F.col("Order_Date"))) \
@@ -142,15 +125,15 @@ if HAS_NEW_RECORDS:
                     F.when(F.col("Discount") == 0, "No Discount")
                     .when(F.col("Discount") <= 0.1, "Low (0-10%)")
                     .when(F.col("Discount") <= 0.2, "Medium (10-20%)")
-                    .otherwise("High (>20%)"))
+                    .otherwise("High (>20%)")) \
+        .fillna({"Discount": 0, "Postal_Code": "UNKNOWN"})
 
-    # Data quality
-    silver_df = silver_df.fillna({"Discount": 0, "Postal_Code": "UNKNOWN"})
-
+    # Remove nulls in critical columns
     critical_columns = ['Row_ID', 'Order_ID', 'Customer_ID', 'Product_ID', 'Order_Date', 'Sales', 'Quantity', 'Profit']
     for col in critical_columns:
         silver_df = silver_df.filter(F.col(col).isNotNull())
 
+    # Quality flags
     silver_df = silver_df \
         .withColumn("is_valid_sale", F.col("Sales") > 0) \
         .withColumn("is_valid_quantity", F.col("Quantity") > 0) \
@@ -162,13 +145,23 @@ if HAS_NEW_RECORDS:
         .withColumn("record_status",
                     F.when(F.col("data_quality_score") == 100, "Valid")
                     .when(F.col("data_quality_score") >= 75, "Warning")
-                    .otherwise("Invalid")) \
+                    .otherwise("Invalid"))
+
+    # Deduplicate
+    window_spec = Window.partitionBy("Order_ID", "Product_ID").orderBy(F.col("ingestion_timestamp").desc())
+    silver_df = silver_df \
+        .withColumn("row_num", F.row_number().over(window_spec)) \
+        .filter(F.col("row_num") == 1) \
+        .drop("row_num")
+
+    # Metadata
+    silver_df = silver_df \
         .withColumn("silver_processing_timestamp", F.current_timestamp()) \
         .withColumn("silver_layer_version", F.lit("v1.0"))
 
     print(f"Transformations complete: {silver_df.count():,} records")
 else:
-    print("Skipping transformations - no new records")
+    print("No new records to transform")
 
 # METADATA ********************
 
@@ -179,55 +172,29 @@ else:
 
 # CELL ********************
 
-# Only write if there are new records
+# Write Silver & Update Watermark
 if HAS_NEW_RECORDS:
-    # Check if silver table exists
     try:
         silver_table = DeltaTable.forPath(spark, SILVER_PATH)
-        table_exists = True
-    except:
-        table_exists = False
-
-    # Write logic based on whether table exists
-    if table_exists:
-        print("Performing MERGE (upsert)...")
         silver_table.alias("target").merge(
             silver_df.alias("source"),
             "target.Row_ID = source.Row_ID"
-        ).whenMatchedUpdateAll() \
-         .whenNotMatchedInsertAll() \
-         .execute()
-    else:
-        print("Performing initial load (overwrite)...")
+        ).whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
+        print("MERGE completed")
+    except:
         silver_df.write.format("delta").mode("overwrite").save(SILVER_PATH)
+        print("Initial load completed")
 
-    print("Silver layer updated successfully")
-else:
-    print("Skipping silver update - no new records")
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-# Only update watermark if there are new records
-if HAS_NEW_RECORDS:
+    # Update watermark
     new_watermark = new_records_df.agg(F.max("ingestion_timestamp")).collect()[0][0]
-    
     watermark_df = spark.createDataFrame(
         [(new_watermark, datetime.now())],
         ["last_processed_timestamp", "updated_at"]
     )
-    
     watermark_df.write.format("delta").mode("overwrite").save(WATERMARK_PATH)
-    
     print(f"Watermark updated: {new_watermark}")
 else:
-    print("No new records - watermark unchanged")
+    print("No new records to write")
 
 # METADATA ********************
 
@@ -238,22 +205,16 @@ else:
 
 # CELL ********************
 
-# Final verification
-silver_final = spark.read.format("delta").load(SILVER_PATH)
+# Verification
+silver_verify = spark.read.format("delta").load(SILVER_PATH)
 
 print("\n" + "=" * 70)
-print("PIPELINE EXECUTION SUMMARY")
+print("SILVER LAYER COMPLETE")
 print("=" * 70)
-print(f"Total records in Silver: {silver_final.count():,}")
-print(f"Records processed this run: {record_count:,}")
-print(f"Load type: {'Incremental' if last_watermark else 'Full'}")
-
-if HAS_NEW_RECORDS:
-    print("\nQuality Distribution:")
-    silver_final.groupBy("record_status").count().show()
-
-print("\nPipeline completed successfully")
-print("=" * 70)
+print(f"Records: {silver_verify.count():,}")
+print(f"Columns: {len(silver_verify.columns)}")
+print("\nQuality Distribution:")
+silver_verify.groupBy("record_status").count().show()
 
 # METADATA ********************
 
