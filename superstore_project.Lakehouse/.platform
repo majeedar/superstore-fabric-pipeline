@@ -2,10 +2,10 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": {
     "type": "Lakehouse",
-    "displayName": "superstore_gold"
+    "displayName": "superstore_project"
   },
   "config": {
     "version": "2.0",
-    "logicalId": "06732c82-e928-84fc-4a75-b3816308e230"
+    "logicalId": "1746a05f-1daf-9222-4967-cccfdb097b4f"
   }
 }
