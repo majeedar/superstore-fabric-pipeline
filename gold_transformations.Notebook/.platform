@@ -1,12 +1,11 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": {
-    "type": "Lakehouse",
-    "displayName": "superstore_bronze",
-    "description": ""
+    "type": "Notebook",
+    "displayName": "gold_transformations"
   },
   "config": {
     "version": "2.0",
-    "logicalId": "c70d955c-f836-afc7-4882-a219a109ee49"
+    "logicalId": "3eb1af67-2d30-a239-48e4-158cae27d527"
   }
 }
