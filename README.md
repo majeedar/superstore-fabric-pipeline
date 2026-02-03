@@ -619,12 +619,12 @@ On Trial SKU, only one Spark session can run at a time. Run notebooks one at a t
 
 ## 15. Author
 
-**[Your Name]**
+**[Majeed Abdul-Razak]**
 
 | Platform | Link |
 |---|---|
-| LinkedIn | [Your LinkedIn URL] |
-| GitHub | [Your GitHub URL] |
+| LinkedIn | [[(https://www.linkedin.com/in/majeedabdul-razak/)] |
+| GitHub | [[(https://github.com/majeedar?tab=repositories)] |
 
 ---
 
