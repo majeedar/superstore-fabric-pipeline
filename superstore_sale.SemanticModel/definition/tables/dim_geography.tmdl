@@ -1,0 +1,65 @@
+table dim_geography
+	lineageTag: 661ddf4f-faf9-4593-96b3-131d42693ea5
+	sourceLineageTag: [dbo].[dim_geography]
+
+	column geography_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 80022a52-ae18-4918-9d4d-e017478b1997
+		sourceLineageTag: geography_key
+		summarizeBy: none
+		sourceColumn: geography_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: 718584b2-3566-4a85-a411-75e38853345b
+		sourceLineageTag: city
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column state
+		dataType: string
+		lineageTag: cca89362-c859-49ff-a10b-2c6934de85cc
+		sourceLineageTag: state
+		summarizeBy: none
+		sourceColumn: state
+
+		annotation SummarizationSetBy = Automatic
+
+	column postal_code
+		dataType: string
+		lineageTag: 82b90fb8-3a20-48b6-a5b4-06cbd1da6335
+		sourceLineageTag: postal_code
+		summarizeBy: none
+		sourceColumn: postal_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column region
+		dataType: string
+		lineageTag: a5d1d206-d4b3-4b51-b836-bc35fc288631
+		sourceLineageTag: region
+		summarizeBy: none
+		sourceColumn: region
+
+		annotation SummarizationSetBy = Automatic
+
+	column country
+		dataType: string
+		lineageTag: 010458e6-9dbe-47e1-b435-7472e442f79b
+		sourceLineageTag: country
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_geography = entity
+		mode: directLake
+		source
+			entityName: dim_geography
+			expressionSource: 'DirectLake - superstore_project'
+

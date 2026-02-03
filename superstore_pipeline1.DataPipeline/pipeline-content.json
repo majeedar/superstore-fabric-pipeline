@@ -1,0 +1,72 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "5c6c850c-d25a-a636-4e91-603e788efa9e",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "superstore_session"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Notebook1",
+        "description": "data ingestion",
+        "dependsOn": []
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "77dab3a8-0f4d-9af8-4cb8-fc3481c94559",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "superstore_session"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Notebook2",
+        "dependsOn": [
+          {
+            "activity": "Notebook1",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "83c007e6-a07e-9478-429b-0eedae679dd9",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "superstore_session"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Notebook3",
+        "dependsOn": [
+          {
+            "activity": "Notebook2",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

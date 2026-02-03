@@ -1,0 +1,67 @@
+table dim_customer
+	lineageTag: 6892a2d4-f802-4622-ae4e-333e6d58e6a5
+	sourceLineageTag: [dbo].[dim_customer]
+
+	column customer_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 2482af10-6e68-41c5-a8f2-50410ef224f3
+		sourceLineageTag: customer_key
+		summarizeBy: none
+		sourceColumn: customer_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_id
+		dataType: string
+		lineageTag: 6ccc283a-e437-42a4-a0d4-85ea89346551
+		sourceLineageTag: customer_id
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_name
+		dataType: string
+		lineageTag: 36cba1a9-18cf-4856-baf0-fef853dd3598
+		sourceLineageTag: customer_name
+		summarizeBy: none
+		sourceColumn: customer_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column segment
+		dataType: string
+		lineageTag: e3edf0a7-1a7b-41b2-bcd2-c023a72f4cfc
+		sourceLineageTag: segment
+		summarizeBy: none
+		sourceColumn: segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column effective_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: e384acd2-e869-40d5-a176-f658b632ff2a
+		sourceLineageTag: effective_date
+		summarizeBy: none
+		sourceColumn: effective_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_current
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: c98a7755-82d9-45ca-aeb7-7c77e47c61ff
+		sourceLineageTag: is_current
+		summarizeBy: none
+		sourceColumn: is_current
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_customer = entity
+		mode: directLake
+		source
+			entityName: dim_customer
+			expressionSource: 'DirectLake - superstore_project'
+

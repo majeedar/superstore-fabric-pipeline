@@ -250,7 +250,7 @@ else:
 
 # CELL ********************
 
-# Create dim_product - Incremental MERGE (SCD Type 1)
+# CELL 7: dim_product - Incremental MERGE (SCD Type 1)
 print("Processing dim_product...")
 
 last_watermark = get_watermark("dim_product")
@@ -287,7 +287,15 @@ if new_records.count() > 0:
                 "is_current"
             )
 
-        # MERGE - Update existing, insert new
+        # Deduplicate - keep first product_id (lowest product_key)
+        products_with_keys = products_with_keys \
+            .withColumn("row_num", F.row_number().over(Window.partitionBy("product_id").orderBy("product_key"))) \
+            .filter(F.col("row_num") == 1) \
+            .drop("row_num")
+
+        print(f"After deduplication: {products_with_keys.count()} unique products")
+
+        # MERGE
         DeltaTable.forName(spark, "dim_product").alias("target").merge(
             products_with_keys.alias("source"),
             "target.product_id = source.product_id"
@@ -315,6 +323,14 @@ if new_records.count() > 0:
                 "effective_date",
                 "is_current"
             )
+
+        # Deduplicate - keep first product_id (lowest product_key)
+        products_dim = products_dim \
+            .withColumn("row_num", F.row_number().over(Window.partitionBy("product_id").orderBy("product_key"))) \
+            .filter(F.col("row_num") == 1) \
+            .drop("row_num")
+
+        print(f"After deduplication: {products_dim.count()} unique products")
 
         spark.sql("DROP TABLE IF EXISTS dim_product")
         products_dim.write.format("delta").saveAsTable("dim_product")
@@ -465,87 +481,6 @@ if new_records.count() > 0:
     save_watermark("fact_sales", new_records.agg(F.max("silver_processing_timestamp")).collect()[0][0])
 else:
     print("fact_sales: No new records")
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-# Find which dimension is causing duplicates
-print("Duplicate Check on Dimensions")
-print("=" * 70)
-
-# dim_geography - check duplicate natural keys
-geo = spark.read.table("dim_geography")
-geo_dupes = geo.groupBy("city", "state", "postal_code").count().filter(F.col("count") > 1)
-print(f"dim_geography duplicates: {geo_dupes.count()}")
-if geo_dupes.count() > 0:
-    geo_dupes.show(10, truncate=False)
-
-# dim_customer - check duplicate natural keys
-cust = spark.read.table("dim_customer")
-cust_dupes = cust.groupBy("customer_id").count().filter(F.col("count") > 1)
-print(f"\ndim_customer duplicates: {cust_dupes.count()}")
-if cust_dupes.count() > 0:
-    cust_dupes.show(10, truncate=False)
-
-# dim_product - check duplicate natural keys
-prod = spark.read.table("dim_product")
-prod_dupes = prod.groupBy("product_id").count().filter(F.col("count") > 1)
-print(f"\ndim_product duplicates: {prod_dupes.count()}")
-if prod_dupes.count() > 0:
-    prod_dupes.show(10, truncate=False)
-
-# dim_date - check duplicate date_key
-dt = spark.read.table("dim_date")
-dt_dupes = dt.groupBy("date_key").count().filter(F.col("count") > 1)
-print(f"\ndim_date duplicates: {dt_dupes.count()}")
-if dt_dupes.count() > 0:
-    dt_dupes.show(10, truncate=False)
-
-# dim_ship_mode - check duplicate ship_mode
-ship = spark.read.table("dim_ship_mode")
-ship_dupes = ship.groupBy("ship_mode").count().filter(F.col("count") > 1)
-print(f"\ndim_ship_mode duplicates: {ship_dupes.count()}")
-if ship_dupes.count() > 0:
-    ship_dupes.show(10, truncate=False)
-
-print("=" * 70)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-# Show all duplicate products with full details
-print("All Duplicate Products in dim_product")
-print("=" * 70)
-
-dim_product = spark.read.table("dim_product")
-
-# Get all duplicate product_ids
-duplicate_ids = dim_product \
-    .groupBy("product_id") \
-    .count() \
-    .filter(F.col("count") > 1) \
-    .select("product_id")
-
-print(f"Total duplicate product_ids: {duplicate_ids.count()}\n")
-
-# Show ALL rows for duplicate product_ids with full details
-duplicate_rows = dim_product.join(duplicate_ids, "product_id") \
-    .orderBy("product_id", "product_key")
-
-print(f"Total duplicate rows: {duplicate_rows.count()}\n")
-duplicate_rows.show(100, truncate=False)
 
 # METADATA ********************
 

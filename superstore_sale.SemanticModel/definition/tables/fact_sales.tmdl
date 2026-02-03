@@ -1,0 +1,197 @@
+table fact_sales
+	lineageTag: e8828a62-0eb5-4d2d-9a39-5b6c4bed25a1
+	sourceLineageTag: [dbo].[fact_sales]
+
+	column row_id
+		dataType: int64
+		formatString: 0
+		lineageTag: aff0a242-ff83-43e8-b36c-32ef9eec0df1
+		sourceLineageTag: row_id
+		summarizeBy: sum
+		sourceColumn: row_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_id
+		dataType: string
+		lineageTag: 1eb0af2f-7668-4b09-904d-1bc85b46bfef
+		sourceLineageTag: order_id
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 1070edcf-beae-4860-86eb-6fc67d56b119
+		sourceLineageTag: order_date_key
+		summarizeBy: none
+		sourceColumn: order_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column ship_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 6636101f-df43-4198-ab03-51aab2a038f8
+		sourceLineageTag: ship_date_key
+		summarizeBy: sum
+		sourceColumn: ship_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 201f2c1c-27c4-40b5-a8b0-7e7eee188667
+		sourceLineageTag: customer_key
+		summarizeBy: none
+		sourceColumn: customer_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 17c28ea9-1f12-4951-a3e6-1c005651e693
+		sourceLineageTag: product_key
+		summarizeBy: none
+		sourceColumn: product_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column geography_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 1a256eae-9b7f-4c39-aa77-5ec924ade091
+		sourceLineageTag: geography_key
+		summarizeBy: none
+		sourceColumn: geography_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column ship_mode_key
+		dataType: int64
+		formatString: 0
+		lineageTag: fe04f96e-a89d-4d01-bf8e-d6b080d4c513
+		sourceLineageTag: ship_mode_key
+		summarizeBy: none
+		sourceColumn: ship_mode_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column sales
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 49974a8a-ab7a-49cf-bcbf-e2d95bede1cc
+		sourceLineageTag: sales
+		summarizeBy: sum
+		sourceColumn: sales
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: 285be2f4-8c98-4f2b-8da8-b7188e2728d4
+		sourceLineageTag: quantity
+		summarizeBy: sum
+		sourceColumn: quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column discount
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 848b24eb-53df-4e3a-9597-03b48b77f9c1
+		sourceLineageTag: discount
+		summarizeBy: sum
+		sourceColumn: discount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column profit
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 89e41a3c-66fd-4a02-b82e-3c62035e53ac
+		sourceLineageTag: profit
+		summarizeBy: sum
+		sourceColumn: profit
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column shipping_days
+		dataType: int64
+		formatString: 0
+		lineageTag: 0c875958-8fe1-4cb9-a2c1-cc445cd12f41
+		sourceLineageTag: shipping_days
+		summarizeBy: sum
+		sourceColumn: shipping_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column profit_margin
+		dataType: double
+		lineageTag: 283d048d-4ae2-49b3-90c0-1d65fbb3799d
+		sourceLineageTag: profit_margin
+		summarizeBy: sum
+		sourceColumn: profit_margin
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column revenue_per_quantity
+		dataType: double
+		lineageTag: a9317b4e-b1fd-4ce5-8ba8-01e1d7348727
+		sourceLineageTag: revenue_per_quantity
+		summarizeBy: sum
+		sourceColumn: revenue_per_quantity
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_profitable
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 1901d3af-050f-481a-9678-e333a02406a5
+		sourceLineageTag: is_profitable
+		summarizeBy: none
+		sourceColumn: is_profitable
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_discount
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 87fe14dc-cbea-420d-906c-24939c1bb502
+		sourceLineageTag: has_discount
+		summarizeBy: none
+		sourceColumn: has_discount
+
+		annotation SummarizationSetBy = Automatic
+
+	column silver_processing_timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: c77c761d-705a-48db-b632-076f00f5eebf
+		sourceLineageTag: silver_processing_timestamp
+		summarizeBy: none
+		sourceColumn: silver_processing_timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_sales = entity
+		mode: directLake
+		source
+			entityName: fact_sales
+			expressionSource: 'DirectLake - superstore_project'
+
