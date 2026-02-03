@@ -1,0 +1,48 @@
+table dim_ship_mode
+	lineageTag: 509616f2-5220-4cca-9618-27f5f10d30bc
+	sourceLineageTag: [dbo].[dim_ship_mode]
+
+	column ship_mode_key
+		dataType: int64
+		formatString: 0
+		lineageTag: d544c8e5-cf82-49ed-b425-86bf3430191a
+		sourceLineageTag: ship_mode_key
+		summarizeBy: none
+		sourceColumn: ship_mode_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column ship_mode
+		dataType: string
+		lineageTag: a65ea7ae-508b-4298-9df4-d79d8630b034
+		sourceLineageTag: ship_mode
+		summarizeBy: none
+		sourceColumn: ship_mode
+
+		annotation SummarizationSetBy = Automatic
+
+	column shipping_category
+		dataType: string
+		lineageTag: 8a8ffd01-eb78-4a45-b3ec-52833e5e4fc8
+		sourceLineageTag: shipping_category
+		summarizeBy: none
+		sourceColumn: shipping_category
+
+		annotation SummarizationSetBy = Automatic
+
+	column expected_delivery_days
+		dataType: int64
+		formatString: 0
+		lineageTag: ad44569c-fca8-4e55-a64b-755a8bd159d9
+		sourceLineageTag: expected_delivery_days
+		summarizeBy: none
+		sourceColumn: expected_delivery_days
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_ship_mode = entity
+		mode: directLake
+		source
+			entityName: dim_ship_mode
+			expressionSource: 'DirectLake - superstore_project'
+

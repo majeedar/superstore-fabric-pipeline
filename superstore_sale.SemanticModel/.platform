@@ -1,11 +1,11 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": {
-    "type": "DataPipeline",
-    "displayName": "ingest_pipeline_superstore"
+    "type": "SemanticModel",
+    "displayName": "superstore_sale"
   },
   "config": {
     "version": "2.0",
-    "logicalId": "71a5344a-d61c-89a4-4e55-e14d7cce105f"
+    "logicalId": "f0f07478-282c-9fea-4a33-d5a1eaf28a8a"
   }
 }

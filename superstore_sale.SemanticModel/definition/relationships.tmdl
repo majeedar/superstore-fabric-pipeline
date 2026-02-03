@@ -1,0 +1,20 @@
+relationship 95c2fc73-2c7d-2bb1-64dc-4c3d9c4a8076
+	fromColumn: fact_sales.customer_key
+	toColumn: dim_customer.customer_key
+
+relationship a48457e4-0f66-f3e6-3858-e7b218432f1d
+	fromColumn: fact_sales.order_date_key
+	toColumn: dim_date.date_key
+
+relationship 592ab0c7-2ff6-bfd3-a632-cc7ef1785789
+	fromColumn: fact_sales.geography_key
+	toColumn: dim_geography.geography_key
+
+relationship bdc5165a-34a1-b794-c69c-185ab209912d
+	fromColumn: fact_sales.product_key
+	toColumn: dim_product.product_key
+
+relationship 37d503a5-2210-98c9-a055-d9d5964e385e
+	fromColumn: fact_sales.ship_mode_key
+	toColumn: dim_ship_mode.ship_mode_key
+
